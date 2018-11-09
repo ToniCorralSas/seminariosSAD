@@ -1,8 +1,8 @@
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var users = ' '; //hacerlo con vectores o matrices para poder modificar los usuarios
-
+var userList = [];
+var count = 0;
 
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
@@ -10,20 +10,26 @@ app.get('/', function(req, res){
 
 io.on('connection', function(socket) {
   console.log('a user connected');
-
+  userList[count]="Anonimo";
+  console.log(userList);
+  
+  socket.emit('id', count);
+  count++;
   socket.broadcast.emit('chat message', 'Nuevo usuario en el chat'); //Broadcast
   console.log('Nuevo usuario en el chat');
-
+  io.emit('lista usuarios', userList);
 
   socket.on('disconnect', function() {
     console.log('user disconnected');
   });
   
-  socket.on('chat user',function(msg){
+  socket.on('change user',function(msg,id){
   	console.log('New user: ' + msg);
-  	users = users+'\n'+msg;
-  	console.log('lista usuarios: ' +users);
-  	io.emit('lista usuarios', users);
+  	userList[id] = msg;
+  	console.log(id);
+  	console.log(userList);
+  	console.log('lista usuarios: ' +userList);
+  	io.emit('lista usuarios', userList);
   	
   });
   socket.on('chat message', function(msg,locutor) {

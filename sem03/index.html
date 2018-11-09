@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { background: #ccc; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      
+      form#formUser { background: #FECB64; padding: 3px; top: 0; width: 240px; height:35%;}
+      div#users { background: #ccc; padding: 3px; bottom: 0; position: fixed; width: 240px; height:65%;}
+      div#columna { right: 0; position: fixed; width: 20%; height: 100%; background: #ccc; padding: 10px; }
+      /*article { float: left; padding: 20px; width: 70%; background-color: #f1f1f1; }*/
+
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+      #listUser { list-style-type: circle; margin: 0; padding: 0; font: 20px Helvetica, Arial; text-align: center;}
+      #nombre { list-style-type: none; margin: 0; padding: 0; font: bold 32px Helvetica, Arial; text-align: center;}
+    </style>
+  </head>
+
+
+  <body>
+
+ <div id="columna">
+      <form id="formUser" align="center" action="">  
+             
+        <table style="width:100%">
+  			<tr>
+  				<!-- version con imagen
+    			<th><img src="leadership-profile.png" width="90" height="90"/></th>  
+    			-->
+    			<th><br><br><br><br><br><br><br></th> 
+    			<th id="nombre">Anonimo<ul id="nombre"></ul></th> 
+    
+  			</tr>
+  		</table>
+        
+        <br>
+        Usuario: 
+        <input id="txt-username" style="width:150px" >
+        <br><br>
+        <button style="width:90px">Entrar</button>     
+      </form>
+  <div id="users">
+  		<br><br>
+      <ul id="listUser"></ul>
+      </div>
+  </div>
+
+  </body>
+  <body>
+
+    <ul id="messages"></ul>  <!- donde se escribe el mensaje ->
+
+    <form id="formMsg" action="">
+      <input id="m" autocomplete="off" /><button>Send</button>
+    </form>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+      var socket = io();
+      var user;
+      $('#formMsg').submit(function() {
+      	
+        socket.emit('chat message', $('#m').val(), user);
+        $('#messages').append($('<li>').text($('#m').val()));
+        $('#m').val(''); //borra valor
+        return false;
+      });
+      //var socket = io();
+      $('#formUser').submit(function() {
+      	socket.emit('chat user', $('#txt-username').val());
+      	user = $('#txt-username').val();
+        $('#nombre').empty();
+        $('#nombre').append($('<listUser>').text(user)); 
+        $('#txt-username').val(''); //borra valor
+        console.log(user);
+        return false;
+      });
+      socket.on('chat message', function(msg) {
+        $('#messages').append($('<li>').text(msg)); 
+      });
+    socket.on('lista usuarios', function(msg) {
+        $('#listUser').empty();
+        $('#listUser').append($('<listUser>').text(msg)); 
+         
+      });
+    </script>
+  </body>
+
+
+
+</html>

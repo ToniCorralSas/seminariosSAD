@@ -33,7 +33,7 @@
   <body>
     <div class="container">
       <div class="page-header">
-        <h1>Node.js Chat <small> Developed by <a href="http://geekytheory.com" target="_blank">Geeky Theory</a></small></h1>
+        <h1>Node.js Chat</h1>
       </div>
       <div class="input-group" style="width:300px;text-align:center;margin:0 auto;" id="nickWrap">
         <input id="nickname" class="form-control input-lg" type="text" placeholder="Enter your username">
@@ -47,7 +47,7 @@
       </div>
       <div id="contentWrap" class="row" style="height: 70%;">
         <div class="col-md-2"></div>
-        <div id="chatWrap"  class="col-md-6">
+        <div id="chatWrap" class="col-md-6">
           <div class="panel panel-success">
             <div class="panel-heading">Chat</div>
             <div id="chat" class="panel-body"></div>
@@ -110,8 +110,10 @@
 
         $messageForm.submit(function(e) {
           e.preventDefault();
-          if($messageBox.val() != '')
+          if($messageBox.val() != '') {
             socket.emit('send message', $messageBox.val());
+            //alert("kaka");
+          }
           $messageBox.val('');
         });
 
@@ -121,7 +123,7 @@
 
         socket.on('usernames', function(data) {
           var html = '';
-          for (var username in data) {
+          for(var username in data) {
             html += username + '<br/>';
           }
           $users.html(html);

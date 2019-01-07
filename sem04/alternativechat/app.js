@@ -17,7 +17,7 @@ io.sockets.on('connection', function(socket) {
   });
     
   socket.on('new user', function(data, callback) {
-    if (data in nicknames) {
+    if(data in nicknames) {
       callback(false);
     }
     else {

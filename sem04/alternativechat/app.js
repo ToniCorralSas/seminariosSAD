@@ -2,6 +2,7 @@ var express = require('express'),
   app = express(),
   server = require('http').createServer(app),
   io = require("socket.io").listen(server),
+  count = 0, 
   nicknames = {};
 
 server.listen(3000);
@@ -11,9 +12,11 @@ app.get('/', function(req, res) {
   res.sendfile(__dirname + '/index.html');
 });
 
-io.sockets.on('connection', function(socket) {
+io.on('connection', function(socket) {
   socket.on('send message', function(data) {
-    io.sockets.emit('new message', {msg: data, nick: socket.nickname});
+    // https://socket.io/docs/emit-cheatsheet/
+    //io.sockets.emit('new message', {msg: data, nick: socket.nickname});
+    socket.broadcast.emit('new message', {msg: data, nick: socket.nickname});
   });
     
   socket.on('new user', function(data, callback) {
@@ -23,8 +26,9 @@ io.sockets.on('connection', function(socket) {
     else {
       callback(true);
       socket.nickname = data;
-      nicknames[socket.nickname] = 1;
+      nicknames[socket.nickname] = ++count;
       updateNickNames();
+      io.sockets.emit('is connected', {msg: data, nick: socket.nickname});
     }
   });
     
@@ -32,6 +36,11 @@ io.sockets.on('connection', function(socket) {
     if(!socket.nickname) return;
     delete nicknames[socket.nickname];
     updateNickNames();
+    io.sockets.emit('is disconnected', {msg: data, nick: socket.nickname});
+  });
+
+  socket.on('typing', (data) => {
+    socket.broadcast.emit('typing', {nick: socket.nickname});
   });
     
   function updateNickNames() {

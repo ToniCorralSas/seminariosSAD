@@ -68,13 +68,13 @@ Vagrant.configure("2") do |config|
   #   apt-get install -y apache2
   # SHELL
 
-  config.disksize.size = '25GB'
-  config.vm.provider "virtualbox" do |vb|
-    vb.memory = "3072"
-  end
+  #config.disksize.size = '25GB'
+  #config.vm.provider "virtualbox" do |vb|
+  #  vb.memory = "3072"
+  #end
   #config.vm.hostname="test-nginx"
   config.vm.provision "shell", path: "provision.sh"
   config.vm.synced_folder '.', '/vagrant', disabled: true
   config.vm.synced_folder "sites-enabled", "/vagrant/sites-enabled"
-  #config.vm.network "forwarded_port", guest: 80, host: 8080, id: "nginx", host_ip: "127.0.0.1"
+  config.vm.network "forwarded_port", guest: 3000, host: 8080, id: "nginx", host_ip: "127.0.0.1"
 end

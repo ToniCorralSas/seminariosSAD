@@ -2,7 +2,6 @@ var express = require('express'),
   app = express(),
   server = require('http').createServer(app),
   io = require("socket.io").listen(server),
-  count = 0, 
   nicknames = {};
 
 server.listen(3000);
@@ -13,10 +12,31 @@ app.get('/', function(req, res) {
 });
 
 io.on('connection', function(socket) {
-  socket.on('send message', function(data) {
-    // https://socket.io/docs/emit-cheatsheet/
-    //io.sockets.emit('new message', {msg: data, nick: socket.nickname});
-    socket.broadcast.emit('new message', {msg: data, nick: socket.nickname});
+  socket.on('send message', function(data, callback) {
+    var msg = data.trim();
+    if(msg.substr(0, 3) === '/w ') {
+      msg = msg.substr(3);
+      var ind = msg.indexOf(' ');
+      if(ind !== -1) {
+        var name = msg.substring(0, ind);
+        var msg = msg.substring(ind + 1);
+        if(name in nicknames) {
+          nicknames[name].emit('whisper', {msg : msg, nick : socket.nickname});
+          //console.log('Whisper!');
+        }
+        else {
+          //callback("Error! Enter a valid user.");
+        }
+      }
+      else {
+        //callback('Error! Please enter a message for your whisper.');
+      }
+    }
+    else {
+      // https://socket.io/docs/emit-cheatsheet/
+      //io.sockets.emit('new message', {msg: data, nick: socket.nickname});
+      socket.broadcast.emit('new message', {msg: data, nick: socket.nickname});
+    }
   });
     
   socket.on('new user', function(data, callback) {
@@ -26,7 +46,7 @@ io.on('connection', function(socket) {
     else {
       callback(true);
       socket.nickname = data;
-      nicknames[socket.nickname] = ++count;
+      nicknames[socket.nickname] = socket;
       updateNickNames();
       io.sockets.emit('is connected', {msg: data, nick: socket.nickname});
     }
@@ -44,6 +64,6 @@ io.on('connection', function(socket) {
   });
     
   function updateNickNames() {
-    io.sockets.emit('usernames', nicknames);
+    io.sockets.emit('usernames', Object.keys(nicknames));
   }
 });

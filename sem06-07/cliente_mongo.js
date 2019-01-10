@@ -1,4 +1,8 @@
 // https://www.w3schools.com/nodejs/nodejs_mongodb.asp
+// $ mongo <dbname> --eval "db.dropDatabase()"
+// $ mongo
+// > show dbs
+// consulta_bd.then(añadir_carro)
 var MongoClient = require('mongodb').MongoClient;
 var url = 'mongodb://localhost:27017/almacen'
 
@@ -41,7 +45,7 @@ MongoClient.connect(url, function(err, db) {
 
 
 // query
-MongoClient.connect(url, function(err, db) {
+/*MongoClient.connect(url, function(err, db) {
   if(err) throw err;
   var dbo = db.db("almacen");
   var query = { cod : 1 };
@@ -50,4 +54,4 @@ MongoClient.connect(url, function(err, db) {
     console.log(result);
     db.close();
   });
-}); 
+});*/

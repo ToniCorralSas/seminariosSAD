@@ -17,7 +17,7 @@ server.listen(port, host, () => {
 
 var MongoClient = require('mongodb').MongoClient;
 //var url = 'mongodb://localhost:27017/almacen'
-function getQuery(url) {
+/*function getQuery(url) {
   MongoClient.connect(url, function(err, db) {
     if(err) throw err;
     var dbo = db.db("almacen");
@@ -31,11 +31,11 @@ function getQuery(url) {
 }
 var aux = Q.denodeify(getQuery);
 var promise = aux('mongodb://localhost:27017/almacen');
-promise.then(console.log, console.error);
+promise.then(console.log, console.error);*/
 
 
 
-// cannot close db
+// https://stackoverflow.com/questions/19112801/node-js-using-promises-with-mongodb#
 /*function getQuery1() {
   return MongoClient.connect('mongodb://localhost:27017/almacen').then(function(db) {
     var dbo = db.db('almacen');
@@ -51,3 +51,30 @@ getQuery1().then(function(items) {
 }, function(err) {
   console.log("The promise was rejected\n", err);
 });*/
+
+
+
+var query = { desc : "hola" };
+function getQuery2(url) {
+  var deferred = Q.defer();
+  MongoClient.connect(url, function(err, db) {
+    if(err) deferred.reject(err);
+    else {
+      deferred.resolve(db.db("almacen"));
+    }
+  });
+  return deferred.promise;
+}
+
+function getQuery3(dbo) {
+  var deferred = Q.defer();
+  dbo.collection("products").find(query).toArray(function(err, result) {
+    if(err) deferred.reject(err);
+    else {
+      deferred.resolve(result);
+    }
+  });
+  return deferred.promise;
+}
+
+getQuery2('mongodb://localhost:27017/almacen').then(getQuery3).then(function(x) { if(x.length === 1) { console.log(x); return "coincidencia"; } else return "no coincidencia"; }).then(console.log, console.error);

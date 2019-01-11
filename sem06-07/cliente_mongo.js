@@ -52,6 +52,7 @@ MongoClient.connect(url, function(err, db) {
   dbo.collection("products").find(query).toArray(function(err, result) {
     if(err) throw err;
     console.log(result);
+    console.log(result.length);
     db.close();
   });
 });*/

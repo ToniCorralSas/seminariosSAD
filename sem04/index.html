@@ -1,91 +1,173 @@
-<!doctype html>
 <html>
   <head>
-    <title>Socket.IO chat</title>
-      <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font: 13px Helvetica, Arial; }
-        form { background: #ccc; padding: 3px; position: fixed; bottom: 0; width: 100%; }
-        form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
-        form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+    <title>
+      Node.js chat
+    </title>
+    <style>
+      #contentWrap{
+        display: none;
+      }
+      #chatWrap{
+        float: left;
+      }
+      #chat{
+        position: relative;
+        width: 100%;
+        float: left;
+        min-height: 100px;
+        height: 90%;
+        overflow: auto;
+      }
+    </style>
+    <script src="https://code.jquery.com/jquery.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
 
-        form#formUser { background: #FECB64; padding: 3px; top: 0; width: 240px; height:35%; }
-        div#users { background: #ccc; padding: 3px; bottom: 0; position: fixed; width: 240px; height:65%; }
-        div#columna { right: 0; position: fixed; width: 20%; height: 100%; background: #ccc; padding: 10px; }
-        /*article { float: left; padding: 20px; width: 70%; background-color: #f1f1f1; }*/
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
 
-        #messages { list-style-type: none; margin: 0; padding: 0; }
-        #messages li { padding: 5px 10px; }
-        #messages li:nth-child(odd) { background: #eee; }
-        #listUser { list-style-type: circle; margin: 0; padding: 0; font: 20px Helvetica, Arial; text-align: center;}
-        #nombre { list-style-type: none; margin: 0; padding: 0; font: bold 32px Helvetica, Arial; text-align: center;}
-      </style>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+        
   </head>
-
-
   <body>
-    <div id="columna">
-      <form id="formUser" align="center" action="">
-        <table style="width:100%">
-          <tr>
-            <!-- version con imagen
-            <th><img src="leadership-profile.png" width="90" height="90"/></th>
+    <div class="container">
+      <div class="page-header">
+        <h1>Node.js Chat</h1>
+      </div>
+      <div class="input-group" style="width: 300px; text-align: center; margin: 0 auto;" id="nickWrap">
+        <input id="nickname" class="form-control input-lg" type="text" placeholder="Enter your username">
+          <span class="input-group-btn">
+            <button class="btn btn-lg btn-primary" type="submit" id="setNick">OK</button>
+          </span>
+      </div>
+      <div class="alert fade in alert-danger alert-dismissable" data-dismiss="alert" id="login-error" style="display: none;">
+        <button type="button" class="close" id="closeAlert">×</button>
+          That username is already taken. Try again.
+      </div>
+      <div id="contentWrap" class="row" style="height: 56%;">
+        <div class="col-md-2"></div>
+        <div id="chatWrap" class="col-md-6">
+          <div class="panel panel-success">
+            <div class="panel-heading">Chat</div>
+            <div id="chat" class="panel-body"></div>
+          </div>
+          <div>
+            <form id="typingBox" class="input-group" style="text-align: left; margin: 5 auto;">
+              <div id="typingInfo" class="panel-body" style="height: 35px; width: 555px; border: 1px;"></div>
+            </form>
+          </div>
+          <div>
+            <form id="send-message" class="input-group" style="text-align: center; margin: 0 auto;">
+              <input id="message" class="form-control input-lg" type="text">
+                <span class="input-group-btn">
+                  <button class="btn btn-lg btn-primary" type="submit">Send</button>
+                </span>
+            </form>
+          </div>
+            <!--
+              <input size="35" id="message"></input>
+              <input type="submit"></input>
+            </form>
             -->
-            <th><br><br><br><br><br><br><br></th> 
-            <th id="nombre">Anonimo<ul id="nombre"></ul></th>
-          </tr>
-        </table>
-        <br>Usuario:<input id="txt-username" style="width:150px" >
-        <br>
-        <br>
-        <button style="width:90px">Entrar</button>
-      </form>
-      <div id="users">
-        <br>Lista de usuarios conectados:<br><br>
-        <ul id="listUser"></ul>
+        </div>
+        <div class="col-md-2">
+          <div class="panel panel-info">
+            <div class="panel-heading">
+              Users
+            </div>
+            <div id="users" class="panel-body"></div>
+          </div>
+        </div>
       </div>
     </div>
-  </body>
-  <body>
-    <ul id="messages"></ul>   <!- donde se escribe el mensaje ->
-    <form id="formMsg" action="">
-      <input id="m" autocomplete="off" />
-      <button>
-        Send
-      </button>
-    </form>
-    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
-    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script>
-      var socket = io();
-      var user;
-      var id;
-      $('#formMsg').submit(function() {
-        socket.emit('chat message', $('#m').val(), user);
-        $('#messages').append($('<li>').text($('#m').val()));
-        $('#m').val('');   // borra valor
-        return false;
-      });
-      //var socket = io();
-      $('#formUser').submit(function() {
-        socket.emit('change user', $('#txt-username').val(), id);
-        user = $('#txt-username').val();
-        $('#nombre').empty();
-        $('#nombre').append($('<listUser>').text(user));
-        $('#txt-username').val('');   // borra valor
-        console.log(user);
-        return false;
-      });
-      socket.on('chat message', function(msg) {
-        $('#messages').append($('<li>').text(msg));
-      });
-      socket.on('lista usuarios', function(msg) {
-        $('#listUser').empty();
-        $('#listUser').append($('<listUser>').text(msg));
-      });
-      socket.on('id', function(msg) {
-        id = msg;
-        console.log(msg);
+      jQuery(function($) {
+        // clear cache in web browser
+        var input = document.getElementById('nickname');
+        input.value = "";
+        var input = document.getElementById('message');
+        input.value = "";
+        var input = document.getElementById('chat');
+        input.value = "";
+
+        var socket = io.connect();
+        var $messageForm = $('#send-message');
+        var $messageBox = $('#message');
+        var $chat = $('#chat');
+        var $buttonSend = $('#send');
+
+        var $nickForm = $('#setNick');
+        var $nickBox = $('#nickname');
+        var $users = $('#users');
+        var $closeAlert = $('#closeAlert');
+        var $typingBox = $('#typingInfo');
+
+        $nickForm.click(function(e) {
+          e.preventDefault();
+          socket.emit('new user', $nickBox.val(), function(data) {
+            if(data) {
+              $('#nickWrap').hide();
+              $('#contentWrap').show();
+            }
+            else {
+              $("#login-error").show();
+            }
+          });
+          //$nickBox.val('');
+        });
+
+        $closeAlert.click(function(e) {
+          $("#login-error").hide();
+        });
+
+        $messageForm.submit(function(e) {
+          e.preventDefault();
+          if($messageBox.val() != '') {
+            //alert($nickBox.val());
+            //alert($messageBox.val());
+            $chat.append('<b>' + $nickBox.val() + ":</b> " + $messageBox.val() + "<br/>");
+            socket.emit('send message', $messageBox.val());
+          }
+          $messageBox.val('');
+        });
+
+        $messageBox.bind("keypress", () => {
+          socket.emit("typing");
+        });
+
+        socket.on('typing', (data) => {
+          $('#typingInfo').html('');
+          $typingBox.append(data.nick + " is typing a message...");
+          setTimeout(function () {
+            $('#typingInfo').html('');
+          }, 1750);
+        });
+
+        socket.on('new message', function(data) {
+          $chat.append('<b>' + data.nick + ":</b> " + data.msg + "<br/>");
+        });
+
+        socket.on('whisper', function(data) {
+          $chat.append('<b>' + data.nick + ":</b> " + data.msg + "<br/>");
+        });
+
+        socket.on('is connected', function(data) {
+          $chat.append(data.nick + " connected<br/>"); 
+        });
+
+        socket.on('is disconnected', function(data) {
+          $chat.append(data.nick + " disconnected<br/>"); 
+        });
+
+        socket.on('usernames', function(data) {
+          var html = '';
+          for(i = 0; i < data.length; i++) {
+            html += data[i] + '<br/>'
+          }
+          $users.html(html);
+        });
       });
     </script>
   </body>

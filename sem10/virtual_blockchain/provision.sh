@@ -25,3 +25,6 @@ mv multichaind multichain-cli multichain-util /usr/local/bin
 #multichain-cli chain1 publish stream1 key1 736f6d65206f746865722064617461
 #multichain-cli chain1 publish stream1 key2 53747265616d732052756c6521
 #multichain-cli chain1 liststreamitems stream1
+#sleep 100
+cp -pr /vagrant/sites-enabled/app.js /home/vagrant/
+cd /home/vagrant/

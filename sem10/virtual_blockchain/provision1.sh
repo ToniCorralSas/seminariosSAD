@@ -25,3 +25,5 @@ mv multichaind multichain-cli multichain-util /usr/local/bin
 #sleep 100
 #multichain-cli chain1 grant 12fpp83HU6TWF9UyshLr95ENG6jhpdtF7rLbgr send   # wallet from provision.sh
 #multichain-cli chain1 grant 12fpp83HU6TWF9UyshLr95ENG6jhpdtF7rLbgr stream1.write
+#sleep 100
+#multichain-cli chain1 subscribe stream1

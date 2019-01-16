@@ -99,7 +99,7 @@ function removeStock1(dbo) {
   var deferred = Q.defer();
   var diff = habia - num;
   var newvalues = { $set: {cod: 2, stock: diff} };
-  dbo.collection("products").updateOne(myquery, newvalues, 
+  dbo.collection("products").updateMany(myquery, newvalues, 
                                        function(err, res) {
     if(err) deferred.reject(err);
     else deferred.resolve(res);
@@ -125,14 +125,16 @@ getQuery2('mongodb://localhost:27017/almacen')
       }
       else {
         carrito[cod] += num;
-        return 'objetos añadidos al carrito';
+        console.log('objetos añadidos al carrito');
+        return 'mongodb://localhost:27017/almacen';
       }
     }
     else
       return "no coincidencia";
   })
-  .then(console.log, console.error);
-
-removeStock('mongodb://localhost:27017/almacen')
+  //.then(console.log, console.error)
+  .then(removeStock)
   .then(removeStock1)
-  .then(console.log, console.error);
+  .catch(function(err) {console.log("intentamos sacar demasiadas existencias o la busqueda no coincide")})
+  .catch(function(err) {console.log("no ha podido conectarse a la base de datos")})
+  .catch(function(err) {console.log("no ha podido modificar la base de datos")});

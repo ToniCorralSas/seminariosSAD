@@ -1,0 +1,11 @@
+{
+  "name": "",
+  "version": "",
+  "description": "",
+  "main": "",
+  "repository": "",
+  "author": "",
+  "dependencies": {
+    "zeromq": ""
+  }
+}

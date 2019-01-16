@@ -2,6 +2,11 @@ var http = require('http');
 var Q = require('q');
 var host = '127.0.0.1';
 var port = 3000;
+var carrito = {2: 0};
+var num = 3;
+var habia;
+//var myquery = { desc : "hierros" };
+var myquery = { cod : 2 };
 
 var server = http.createServer((req, res) => {
   res.statusCode = 200;
@@ -16,6 +21,7 @@ server.listen(port, host, () => {
 
 
 var MongoClient = require('mongodb').MongoClient;
+/***************************************************************************/
 //var url = 'mongodb://localhost:27017/almacen'
 /*function getQuery(url) {
   MongoClient.connect(url, function(err, db) {
@@ -35,6 +41,7 @@ promise.then(console.log, console.error);*/
 
 
 
+/***************************************************************************/
 // https://stackoverflow.com/questions/19112801/node-js-using-promises-with-mongodb#
 /*function getQuery1() {
   return MongoClient.connect('mongodb://localhost:27017/almacen').then(function(db) {
@@ -54,7 +61,7 @@ getQuery1().then(function(items) {
 
 
 
-var query = { desc : "hola" };
+/***************************************************************************/
 function getQuery2(url) {
   var deferred = Q.defer();
   MongoClient.connect(url, function(err, db) {
@@ -68,7 +75,7 @@ function getQuery2(url) {
 
 function getQuery3(dbo) {
   var deferred = Q.defer();
-  dbo.collection("products").find(query).toArray(function(err, result) {
+  dbo.collection("products").find(myquery).toArray(function(err, result) {
     if(err) deferred.reject(err);
     else {
       deferred.resolve(result);
@@ -77,4 +84,55 @@ function getQuery3(dbo) {
   return deferred.promise;
 }
 
-getQuery2('mongodb://localhost:27017/almacen').then(getQuery3).then(function(x) { if(x.length === 1) { console.log(x); return "coincidencia"; } else return "no coincidencia"; }).then(console.log, console.error);
+function removeStock(url) {
+  var deferred = Q.defer();
+  MongoClient.connect(url, function(err, db) {
+    if(err) deferred.reject(err);
+    else {
+      deferred.resolve(db.db("almacen"));
+    }
+  });
+  return deferred.promise;
+}
+
+function removeStock1(dbo) {
+  var deferred = Q.defer();
+  var diff = habia - num;
+  var newvalues = { $set: {cod: 2, stock: diff} };
+  dbo.collection("products").updateOne(myquery, newvalues, 
+                                       function(err, res) {
+    if(err) deferred.reject(err);
+    else deferred.resolve(res);
+  });
+  return deferred.promise;
+}
+
+getQuery2('mongodb://localhost:27017/almacen')
+  .then(getQuery3)
+  .then(function(x) { 
+    if(x.length === 1) {
+      console.log(x);
+      var cod = x[0]['cod'];
+      var desc = x[0]['desc'];
+      habia = x[0]['stock'];
+      if(cod in carrito) {
+      }
+      else {
+        carrito[cod] = 0;
+      }
+      if(habia < num) {
+        return "se intentan sacar demasiadas existencias";
+      }
+      else {
+        carrito[cod] += num;
+        return 'objetos añadidos al carrito';
+      }
+    }
+    else
+      return "no coincidencia";
+  })
+  .then(console.log, console.error);
+
+removeStock('mongodb://localhost:27017/almacen')
+  .then(removeStock1)
+  .then(console.log, console.error);
